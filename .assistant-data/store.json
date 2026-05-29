@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "id": "540245ec-9565-4ada-a4cc-096a4f75a1a8",
+      "name": "apps/web/src/app/page.tsx",
+      "source": "sample",
+      "mimeType": "text/tsx",
+      "size": 219,
+      "createdAt": "2026-05-29T16:05:59.491Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "96a67fca-7c63-43d7-81e9-05a50685024e",
+      "name": "apps/web/src/app/api/search/route.ts",
+      "source": "sample",
+      "mimeType": "text/ts",
+      "size": 311,
+      "createdAt": "2026-05-29T16:05:59.495Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "ce1e4f44-82c0-4b81-acb6-7745667dceaf",
+      "name": "apps/web/src/lib/search-projects.ts",
+      "source": "sample",
+      "mimeType": "text/ts",
+      "size": 304,
+      "createdAt": "2026-05-29T16:05:59.495Z",
+      "chunkCount": 2
+    },
+    {
+      "id": "5e57e788-8697-4f69-8466-6d01451c1797",
+      "name": "docs/architecture.md",
+      "source": "sample",
+      "mimeType": "text/markdown",
+      "size": 299,
+      "createdAt": "2026-05-29T16:05:59.495Z",
+      "chunkCount": 1
+    }
+  ],
+  "chunks": [
+    {
+      "id": "540245ec-9565-4ada-a4cc-096a4f75a1a8:1",
+      "documentId": "540245ec-9565-4ada-a4cc-096a4f75a1a8",
+      "documentName": "apps/web/src/app/page.tsx",
+      "lineStart": 1,
+      "lineEnd": 10,
+      "title": "import { DashboardShell } from \"@/components/dashboard-shell\";",
+      "content": "import { DashboardShell } from \"@/components/dashboard-shell\";\n\nexport default function HomePage() {\n  return (\n    <main className=\"min-h-screen bg-slate-950 text-slate-50\">\n      <DashboardShell />\n    </main>\n  );\n}"
+    },
+    {
+      "id": "96a67fca-7c63-43d7-81e9-05a50685024e:1",
+      "documentId": "96a67fca-7c63-43d7-81e9-05a50685024e",
+      "documentName": "apps/web/src/app/api/search/route.ts",
+      "lineStart": 1,
+      "lineEnd": 13,
+      "title": "import { NextResponse } from \"next/server\";",
+      "content": "import { NextResponse } from \"next/server\";\nimport { findProjects } from \"@/lib/search-projects\";\n\nexport async function POST(request: Request) {\n  const { query } = await request.json();\n  const results = await findProjects(query);\n\n  return NextResponse.json({\n    results,\n    count: results.length,\n  });\n}"
+    },
+    {
+      "id": "ce1e4f44-82c0-4b81-acb6-7745667dceaf:1",
+      "documentId": "ce1e4f44-82c0-4b81-acb6-7745667dceaf",
+      "documentName": "apps/web/src/lib/search-projects.ts",
+      "lineStart": 1,
+      "lineEnd": 13,
+      "title": "export async function findProjects(query: string) {",
+      "content": "export async function findProjects(query: string) {\n  const normalized = query.trim().toLowerCase();\n\n  if (normalized.includes(\"billing\")) {\n    return [\n      {\n        id: \"billing-invoices\",\n        name: \"Billing and invoices\",\n        owner: \"finance-platform\",\n      },\n    ];\n  }"
+    },
+    {
+      "id": "ce1e4f44-82c0-4b81-acb6-7745667dceaf:2",
+      "documentId": "ce1e4f44-82c0-4b81-acb6-7745667dceaf",
+      "documentName": "apps/web/src/lib/search-projects.ts",
+      "lineStart": 14,
+      "lineEnd": 16,
+      "title": "return [];",
+      "content": "return [];\n}"
+    },
+    {
+      "id": "5e57e788-8697-4f69-8466-6d01451c1797:1",
+      "documentId": "5e57e788-8697-4f69-8466-6d01451c1797",
+      "documentName": "docs/architecture.md",
+      "lineStart": 1,
+      "lineEnd": 6,
+      "title": "Architecture",
+      "content": "# Architecture\n\nThe web app keeps uploaded code snippets on disk, chunks them by file, and ranks relevant passages with a lexical search index.\n\nThe assistant can hand the retrieved context to an LLM when credentials are configured, or fall back to a grounded summary when no provider is available."
+    }
+  ]
+}
