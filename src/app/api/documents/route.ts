@@ -1,7 +1,29 @@
 import { NextResponse } from "next/server";
 import { addDocuments, getDocumentSummaries, getStoreSnapshot } from "@/lib/storage";
+import { PDFParse } from "pdf-parse";
 
 export const runtime = "nodejs";
+
+async function extractFileText(file: File) {
+  const mimeType = file.type || "text/plain";
+  const lowerName = file.name.toLowerCase();
+
+  if (mimeType === "application/pdf" || lowerName.endsWith(".pdf")) {
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const parser = new PDFParse({ data: bytes });
+    const parsed = await parser.getText();
+    await parser.destroy();
+    return {
+      mimeType,
+      text: parsed.text.trim(),
+    };
+  }
+
+  return {
+    mimeType,
+    text: (await file.text()).trim(),
+  };
+}
 
 export async function GET() {
   const [documents, store] = await Promise.all([getDocumentSummaries(), getStoreSnapshot()]);
@@ -23,13 +45,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No files were provided." }, { status: 400 });
   }
 
-  const inputs = await Promise.all(
-    files.map(async (file) => ({
-      name: file.name,
-      mimeType: file.type || "text/plain",
-      text: await file.text(),
-    })),
-  );
+  let inputs;
+
+  try {
+    inputs = await Promise.all(
+      files.map(async (file) => {
+        const extracted = await extractFileText(file);
+
+        if (!extracted.text) {
+          throw new Error(`No readable text found in ${file.name}.`);
+        }
+
+        return {
+          name: file.name,
+          mimeType: extracted.mimeType,
+          text: extracted.text,
+        };
+      }),
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to process uploaded files.";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 
   const documents = await addDocuments(inputs);
 

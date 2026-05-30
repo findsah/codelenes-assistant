@@ -232,7 +232,7 @@ export function AssistantShell({ initialDocuments }: AssistantShellProps) {
               <div>
                 <p className="text-sm font-semibold text-foreground">Import files</p>
                 <p className="mt-1 text-xs leading-5 text-muted">
-                  Plain text, markdown, JSON, and source files work best.
+                  Plain text, markdown, JSON, source files, and PDF documents are supported.
                 </p>
               </div>
               <span className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
@@ -240,7 +240,7 @@ export function AssistantShell({ initialDocuments }: AssistantShellProps) {
               </span>
             </div>
             <input
-              accept=".ts,.tsx,.js,.jsx,.json,.md,.txt,.py,.go,.rs,.java,.c,.cpp,.cs,.yml,.yaml,.toml"
+              accept=".ts,.tsx,.js,.jsx,.json,.md,.txt,.py,.go,.rs,.java,.c,.cpp,.cs,.yml,.yaml,.toml,.pdf,application/pdf"
               multiple
               type="file"
               className="hidden"

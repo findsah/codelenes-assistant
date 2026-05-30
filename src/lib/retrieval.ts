@@ -6,6 +6,44 @@ interface SearchOptions {
   documentId?: string;
 }
 
+const CODE_INTENT_PATTERN =
+  /where|implemented|implementation|function|class|api|endpoint|route|handler|service|module|dependency|logic|fix|bug/i;
+
+const META_DOC_PATTERN =
+  /(^|\/)AGENTS\.md$|(^|\/)CLAUDE\.md$|(^|\/)copilot-instructions\.md$|(^|\/)CONTRIBUTING\.md$/i;
+
+const CODE_FILE_PATTERN =
+  /\.(ts|tsx|js|jsx|mjs|cjs|py|go|rs|java|cs|cpp|c|h|hpp|rb|php|swift|kt|scala|sql|sh|ps1|yml|yaml|toml|json)$/i;
+
+function queryTargetsMetaDocs(query: string) {
+  return /agent|instruction|prompt|claude|copilot|contributing|readme/i.test(query);
+}
+
+function isMetaDocument(documentName: string) {
+  return META_DOC_PATTERN.test(documentName);
+}
+
+function applyDocumentTypeAdjustment(documentName: string, query: string, score: number) {
+  const isCodeIntent = CODE_INTENT_PATTERN.test(query);
+  const mentionsMetaDocs = queryTargetsMetaDocs(query);
+  const isMetaDoc = META_DOC_PATTERN.test(documentName);
+  const isCodeFile = CODE_FILE_PATTERN.test(documentName);
+
+  if (!isCodeIntent) {
+    return score;
+  }
+
+  if (isMetaDoc && !mentionsMetaDocs) {
+    return score * 0.2;
+  }
+
+  if (isCodeFile) {
+    return score * 1.25;
+  }
+
+  return score;
+}
+
 function boostFromTitle(title: string, queryTokens: string[]) {
   const normalizedTitle = title.toLowerCase();
   return queryTokens.reduce((boost, token) => {
@@ -20,6 +58,8 @@ function boostFromTitle(title: string, queryTokens: string[]) {
 export function searchChunks(chunks: AssistantChunk[], query: string, options: SearchOptions = {}) {
   const limit = options.limit ?? 5;
   const queryTokens = Array.from(new Set(tokenize(query)));
+  const isCodeIntent = CODE_INTENT_PATTERN.test(query);
+  const mentionsMetaDocs = queryTargetsMetaDocs(query);
   const filteredChunks = options.documentId
     ? chunks.filter((chunk) => chunk.documentId === options.documentId)
     : chunks;
@@ -76,6 +116,7 @@ export function searchChunks(chunks: AssistantChunk[], query: string, options: S
     }
 
     score += boostFromTitle(chunk.title, queryTokens);
+    score = applyDocumentTypeAdjustment(chunk.documentName, query, score);
 
     return {
       chunk,
@@ -84,10 +125,18 @@ export function searchChunks(chunks: AssistantChunk[], query: string, options: S
     } satisfies SearchHit;
   });
 
-  return scored
+  const ranked = scored
     .filter((hit) => hit.score > 0)
     .sort((left, right) => right.score - left.score || left.chunk.documentName.localeCompare(right.chunk.documentName))
-    .slice(0, limit);
+    .slice(0, limit * 2);
+
+  if (isCodeIntent && !mentionsMetaDocs) {
+    return ranked
+      .filter((hit) => !isMetaDocument(hit.chunk.documentName))
+      .slice(0, limit);
+  }
+
+  return ranked.slice(0, limit);
 }
 
 export function buildContextBlock(hits: SearchHit[]) {

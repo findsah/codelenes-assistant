@@ -36,6 +36,15 @@
       "size": 299,
       "createdAt": "2026-05-29T16:05:59.495Z",
       "chunkCount": 1
+    },
+    {
+      "id": "fb0bd4ca-bb88-450a-9c09-264f8f92b1b5",
+      "name": "AGENTS.md",
+      "source": "upload",
+      "mimeType": "application/octet-stream",
+      "size": 327,
+      "createdAt": "2026-05-30T11:54:36.492Z",
+      "chunkCount": 1
     }
   ],
   "chunks": [
@@ -83,6 +92,15 @@
       "lineEnd": 6,
       "title": "Architecture",
       "content": "# Architecture\n\nThe web app keeps uploaded code snippets on disk, chunks them by file, and ranks relevant passages with a lexical search index.\n\nThe assistant can hand the retrieved context to an LLM when credentials are configured, or fall back to a grounded summary when no provider is available."
+    },
+    {
+      "id": "fb0bd4ca-bb88-450a-9c09-264f8f92b1b5:1",
+      "documentId": "fb0bd4ca-bb88-450a-9c09-264f8f92b1b5",
+      "documentName": "AGENTS.md",
+      "lineStart": 1,
+      "lineEnd": 6,
+      "title": "<!-- BEGIN:nextjs-agent-rules -->",
+      "content": "<!-- BEGIN:nextjs-agent-rules -->\n# This is NOT the Next.js you know\n\nThis version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.\n<!-- END:nextjs-agent-rules -->"
     }
   ]
 }
