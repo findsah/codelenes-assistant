@@ -97,7 +97,8 @@ export function AssistantShell({ initialDocuments }: AssistantShellProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Upload failed");
+        const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errorPayload?.error ?? "Upload failed.");
       }
 
       const data = (await response.json()) as { documents: AssistantDocument[]; message: string };
@@ -105,8 +106,12 @@ export function AssistantShell({ initialDocuments }: AssistantShellProps) {
       await refreshDocuments(data.documents[0]?.id ?? selectedDocumentId);
       setStatus(data.message);
       event.target.value = "";
-    } catch {
-      setStatus("Upload failed. Only plain text-style files are supported in this demo.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Upload failed. Text/code files and most PDFs are supported in this demo.";
+      setStatus(message);
     } finally {
       setIsUploading(false);
     }
@@ -265,13 +270,20 @@ export function AssistantShell({ initialDocuments }: AssistantShellProps) {
                 const isSelected = document.id === selectedDocumentId;
 
                 return (
-                  <button
+                  <div
                     key={document.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() =>
                       setSelectedDocumentId((current) => (current === document.id ? null : document.id))
                     }
-                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setSelectedDocumentId((current) => (current === document.id ? null : document.id));
+                      }
+                    }}
+                    className={`w-full cursor-pointer rounded-2xl border px-4 py-3 text-left transition ${
                       isSelected
                         ? "border-accent/60 bg-accent/10 text-foreground"
                         : "border-border/70 bg-white/4 text-muted hover:border-border hover:bg-white/7"
@@ -296,7 +308,7 @@ export function AssistantShell({ initialDocuments }: AssistantShellProps) {
                         Remove
                       </button>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

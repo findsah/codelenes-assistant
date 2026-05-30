@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { addDocuments, getDocumentSummaries, getStoreSnapshot } from "@/lib/storage";
-import { PDFParse } from "pdf-parse";
 
 export const runtime = "nodejs";
 
@@ -10,9 +9,10 @@ async function extractFileText(file: File) {
 
   if (mimeType === "application/pdf" || lowerName.endsWith(".pdf")) {
     const bytes = Buffer.from(await file.arrayBuffer());
-    const parser = new PDFParse({ data: bytes });
-    const parsed = await parser.getText();
-    await parser.destroy();
+    const { default: pdfParse } = (await import("pdf-parse/lib/pdf-parse.js")) as {
+      default: (data: Buffer) => Promise<{ text: string }>;
+    };
+    const parsed = await pdfParse(bytes);
     return {
       mimeType,
       text: parsed.text.trim(),
